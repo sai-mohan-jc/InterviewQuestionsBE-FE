@@ -1,0 +1,1 @@
+1. We have multiple services and interacted to each other. If one service fails how to handle this without effecting user experience?

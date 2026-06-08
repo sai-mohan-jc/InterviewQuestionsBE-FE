@@ -1,0 +1,14 @@
+1. We have HashMap, store employee object if it is slow performance how to handle this?
+2. How to find collisions in HashMap?
+3. How HashMap works internally
+4. Which Map follow insertion order, Which one not follow and which one used for ascending order.
+5. What is functional interface?
+6. What is the existing functional interfaces ? Which Functional interface using map.
+7. What is the use of Kafka and partitions. What is the consumer group?
+8. How we can confirm our message is consumed or not? 
+9. What is the use of acknowledgement in kafka?
+10.What is the use of SAGA DP?
+11.How circuit breaker works?
+12.What is junit and Mockito?
+13. How to test to call exact DB ?
+14. What is integration testing?

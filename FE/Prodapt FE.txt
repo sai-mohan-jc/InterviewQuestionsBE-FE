@@ -1,0 +1,23 @@
+1. What are the challenges you are facing in ReactJS.(How to display 10000 records)
+2.We have four tabs. Each tab have some 200 records to display. How we can get the data each tab we can call API or get all the records at a time.
+3. What is lazy loading in java? 
+4. We have 2 components like 
+Header -cart  {}
+Main - list of items -add
+Here grid 
+
+When we click add button add in cart, it deselect decrease from cart, add new items in grid and update the grid also.
+
+5. How state management works.
+6. What is the use of reducer in redux.
+7. How to remove record from id=3. Any
+const data = [
+{"id":"1", name:" product1"},
+{"id":"2", name:" product2"},
+{"id":"3", name:" product3"},
+{"id":"4", name:" product4"}]
+
+8. If you are using filter what will be the result.
+
+
+
