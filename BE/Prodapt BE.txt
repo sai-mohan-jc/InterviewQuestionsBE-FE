@@ -5,7 +5,7 @@
                 Map<Employee,String> map=new HashMap<>(10000);
            3. Thread Safety Issues: In multithreaded applications, HashMap is not safe. we can use ConcurrentHashMap.
            4. Strong Data structure Choices: if sorting needed use TreeMap, if insertion order needed use LinkedHashMap. 
-
+----------------------------------------------------------------------------------------------------------------------------------------------------
 
 2. What is the use of HashCode and equals method?
    Every java class inherits hashCode and equals methods from  object class.
@@ -91,10 +91,12 @@ public class Employee {
 }
 
 O/P: 1
+------------------------------------------------------------------------------------------------------------------------------------------
 
 3. How to find collisions in HashMap?
    Two different keys generate the same hash bucket.
    Bucket calculation using hash&(n-1). It uses Bitwise and operator.
+------------------------------------------------------------------------------------------------------------------
    
 4. How HashMap works internally?
 
@@ -113,19 +115,20 @@ O/P: 1
   *heavy collision → O(n) before Java 8-using linkedList
   *O(log n) after treeification - Red Black Tree
 6.If threshold exceeds → resize HashMap
-
-4. Which Map follow insertion order, Which one not follow and which one used for ascending order.
+---------------------------------------------------------------------------------------------------------------------
+5. Which Map follow insertion order, Which one not follow and which one used for ascending order.
    LinkedHashMap follows insertion order.
    HashMap not follows the insertion order.
    TreeMap follows the Ascending order. 
+---------------------------------------------------------------------------------------------------------------------
 
-5. What is functional interface?
+6. What is functional interface?
 
    Which functional interface contains only one abstract method and any number of default and static methods. 
    Lambda expression without functional interface not possible.
-
+-----------------------------------------------------------------------------------------------------------------------
  
-6. What is the existing functional interfaces ? Which Functional interface using map.
+7. What is the existing functional interfaces ? Which Functional interface using map.
                 //Function map(Funtion) apply method
 		numList.stream().map(a->a*a).collect(Collectors.toList());
 		//Predicate filter(Predicate) test method
@@ -147,19 +150,22 @@ O/P: 1
                Stream.iterate("n", val->val+"n").limit(6).forEach(System.out::println);
                List<Integer> listnum=  Stream.iterate(1, a->a+1).limit(5).toList();
 		System.out.println(listnum);
+--------------------------------------------------------------------------------------------------------------------------
 
-7. What is the use of Kafka and partitions. What is the consumer group?
+8. What is the use of Kafka and partitions. What is the consumer group?
    Kafka is an event-streaming platform used for asynchronous communication between services.
    Topics are used to store messages/events. Topics are divided into partitions for scalability, parallel processing, and better performance.
    Partitions are mainly useful when multiple instances of the same service exist within the same consumer group, because Kafka can distribute partitions  among those instances for parallel processing and scalability. 
    Consumer groups help distribute messages among multiple consumer instances and Kafka tracks offsets using consumer groups. 
    Offsets are unique message positions inside partitions used to track consumed messages. 
    Replicas are copies of partitions used for fault tolerance and high availability
+-------------------------------------------------------------------------------------------------------------------------
 
-8. How we can confirm our message is consumed or not? 
+9. How we can confirm our message is consumed or not? 
 Kafka confirms message consumption using committed offsets. By comparing the latest offset and consumer committed offset, we can identify pending messages using consumer lag.
+------------------------------------------------------------------------------------------------------
 
-9. What is the use of acknowledgement in kafka?
+10. What is the use of acknowledgement in kafka?
  Message processed successfully, now commit the offset.
 Two types of offset commit:
 1. Auto commit:
@@ -171,13 +177,469 @@ Two types of offset commit:
    Manual commit helps to send manual acknowledgement once business logic completed.
  
 Ex: ack.acknowledged();
+--------------------------------------------------------------------------------------------------------
 
-10.What is the use of SAGA DP?
-11.How circuit breaker works?
-12.What is junit and Mockito?
-13. How to test to call exact DB ?
-14. What is integration testing?
-15. We have list of cites and list of employee object now requirement is to find which employee have cities in list. Need to increase 10% salary. Write a logic?
+11.What is the use of SAGA DP?
+   What is the SAGA Pattern?
+   The Saga Pattern is used for distributed transaction management in microservices architectures.
+   If one step fails, the Saga executes compensating transactions (rollback actions) to undo previously completed steps.
+1. Choreography Saga
+Choreography design pattern is used for event-driven models like Kafka.
+Here there is no central co-ordinator. Each service listens each event and react accordingly.
+order service
+|
+payment service
+|
+inventory Register
+|
+Shipping Service
+
+Coding part:
+
+order Service:
+
+public void createOrder(Event event){
+
+
+kafkatemplate.send("topic-name",event);
+}
+
+
+payment Service:
+@KafkaListner(topic="",group-name="")
+public void consume(OrderEvent event){
+
+// Business logic
+
+kafkaTemplate.send("topic-name",event);
+
+}
+
+Inventory Registry:
+
+@KafkaListner(topic="",group-name="")
+public void consume(paymentEvent event){
+
+// Business logic
+
+Boolean avaialblestock=API call;
+
+if(!avaialablestock){
+
+kafkaTemplate.send("inventory-fail-topic",event);
+}else{
+kafkaTemplate.send("inventory-sucess-topic",event);
+}
+
+}
+
+Shipping service:
+
+@KafkaListner(topic="",group-name="")
+public void consume(Inventory event){
+
+// Business logic
+
+
+if(!avaialablestock){
+
+kafkaTemplate.send("inventory-fail-topic",event);
+}
+}
+
+
+Orchestration saga:
+Here we use central component called saga orchestrator controls the entire workflow.
+
+Orchestrator
+    |
+    |--> Order Service
+    |
+    |--> Payment Service
+    |
+    |--> Inventory Service
+    |
+    |--> Shipping Service
+Here orchestrator decide which service to call next. If success which service to call and if fail which service to call.
+Here we are call as rollback transaction we can call it as These are called compensating transactions.
+
+Scenario:
+---------
+
+User places an order:
+---------------------
+Create Order
+Deduct Payment
+Reserve Inventory
+
+If Inventory fails:
+-------------------
+Refund Payment
+Cancel Order
+Order Service
+
+REST API:
+---------
+@RestController
+@RequestMapping("/orders")
+@RequiredArgsConstructor
+public class OrderController {
+
+    private final SagaOrchestrator sagaOrchestrator;
+
+    @PostMapping
+    public String createOrder() {
+        sagaOrchestrator.startSaga();
+        return "Order Processing Started";
+    }
+}
+Saga Orchestrator:
+-------------------
+
+This is the central coordinator.
+
+@Service
+@RequiredArgsConstructor
+public class SagaOrchestrator {
+
+    private final PaymentClient paymentClient;
+    private final InventoryClient inventoryClient;
+
+    public void startSaga() {
+
+        try {
+
+            // Step 1
+            paymentClient.deductPayment();
+
+            // Step 2
+            inventoryClient.reserveInventory();
+
+            System.out.println("Order Completed Successfully");
+
+        } catch (Exception ex) {
+
+            System.out.println("Inventory Failed");
+
+            // Compensation Transaction
+            paymentClient.refundPayment();
+
+            System.out.println("Payment Refunded");
+        }
+    }
+}
+
+Payment Client:
+--------------
+Using OpenFeign.
+
+@FeignClient(name = "payment-service")
+public interface PaymentClient {
+
+    @PostMapping("/payment/deduct")
+    void deductPayment();
+
+    @PostMapping("/payment/refund")
+    void refundPayment();
+}
+
+Inventory Client:
+----------------
+@FeignClient(name = "inventory-service")
+public interface InventoryClient {
+
+    @PostMapping("/inventory/reserve")
+    void reserveInventory();
+}
+
+Payment Service:
+----------------
+@RestController
+@RequestMapping("/payment")
+public class PaymentController {
+
+    @PostMapping("/deduct")
+    public void deductPayment() {
+
+        System.out.println("Payment Deducted");
+    }
+
+    @PostMapping("/refund")
+    public void refundPayment() {
+
+        System.out.println("Payment Refunded");
+    }
+}
+
+Inventory Service:
+------------------
+@RestController
+@RequestMapping("/inventory")
+public class InventoryController {
+
+    @PostMapping("/reserve")
+    public void reserveInventory() {
+
+        throw new RuntimeException("Stock Not Available");
+    }
+}
+Execution:
+----------
+Order Created
+Payment Deducted
+Inventory Failed
+Payment Refunded
+
+Notice:
+-------
+
+❌ No DB rollback
+
+✅ Compensation transaction (refundPayment()) 
+
+Note: 
+Choreography – services communicate through events (e.g., Kafka) without a central controller.
+Orchestration – a central orchestrator coordinates the workflow and triggers compensating actions when failures occur.
+
+We have some issue if orchestration service crashes, what will happen. Compensation transaction will fail and not able to perform refund after restart the service.
+
+For this we are using camunda.
+
+Camunda:
+It is a workflow engine. Instead of workflow maintain by yourself, Camundo will store.
+
+Need to add dependency for this:
+<dependency>
+    <groupId>org.camunda.bpm.springboot</groupId>
+    <artifactId>camunda-bpm-spring-boot-starter</artifactId>
+    <version>7.20.0</version>
+</dependency>
+
+Code:
+@Component("paymentDelegate")
+public class PaymentDelegate
+        implements JavaDelegate {
+
+    @Override
+    public void execute(
+            DelegateExecution execution) {
+
+        System.out.println("Payment Done");
+    }
+}
+BPMN- Business process model and notation
+
+Here it has own DB store all the steps which service success and which service fail or crash. Based on that compensation logic will process.
+
+
+Two ways we can implement camunda:
+1. Embedded Camunda (Just Dependency)
+2. Dedicated Camunda Server (Production)
+--------------------------------------------------------------------------------------------------------------
+
+12.How circuit breaker works?
+   A Circuit Breaker is a design pattern used in microservices to prevent a failing service from causing a cascade failure across the system.
+
+Three States of Circuit Breaker:
+--------------------------------
+1. Closed State (Normal):
+-------------------------
+
+Everything is healthy.
+
+Order Service
+      |
+      v
+Payment Service
+
+Requests are allowed through.
+
+SUCCESS
+SUCCESS
+SUCCESS
+
+2. Open State (Service Failing):
+---------------------------------
+
+Failure threshold reached.
+
+FAIL
+FAIL
+FAIL
+FAIL
+
+Circuit opens:
+
+Order Service
+      X
+Payment Service
+
+Now:
+
+No actual call is made.
+
+Immediate response:
+
+"Payment service unavailable"
+
+or fallback response.
+
+3. Half-Open State (Testing):
+-----------------------------
+
+After a wait period:
+
+30 seconds later
+
+Circuit Breaker allows a few requests.
+
+Test Request
+
+If successful:
+
+Circuit -> CLOSED
+
+If failed:
+
+Circuit -> OPEN again
+
+Spring Boot Example (Resilience4j):
+-----------------------------------
+
+Dependency:
+-----------
+
+<dependency>
+    <groupId>io.github.resilience4j</groupId>
+    <artifactId>resilience4j-spring-boot3</artifactId>
+</dependency>
+Service:
+@Service
+public class PaymentService {
+
+    @CircuitBreaker(
+        name = "paymentService",
+        fallbackMethod = "fallback")
+    public String makePayment() {
+
+        throw new RuntimeException("Bank Down");
+    }
+
+    public String fallback(Exception ex) {
+
+        return "Payment Service Temporarily Unavailable";
+    }
+}
+Controller
+@RestController
+@RequiredArgsConstructor
+public class PaymentController {
+
+    private final PaymentService paymentService;
+
+    @GetMapping("/pay")
+    public String pay() {
+
+        return paymentService.makePayment();
+    }
+}
+Configuration:
+-------------
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      paymentService:
+        failureRateThreshold: 50
+        slidingWindowSize: 10
+        waitDurationInOpenState: 30s
+
+Meaning:
+--------
+Monitor last 10 requests
+If > 50% fail
+Open circuit
+Wait 30 seconds
+Move to Half-Open
+Example Flow
+Request 1 -> Fail
+Request 2 -> Fail
+Request 3 -> Fail
+Request 4 -> Fail
+Request 5 -> Fail
+
+Failure rate:
+-------------
+5/5 = 100%
+
+Threshold exceeded.
+
+Circuit:
+--------
+OPEN
+
+Next requests:
+--------------
+No API call made
+Fallback executed
+
+Circuit Breaker + Saga:
+-----------------------
+
+Very common combination.
+
+Example:
+
+Order Service
+    |
+Payment Service
+    |
+Inventory Service
+
+Inventory Service is down.
+
+Without Circuit Breaker:
+
+Wait
+Timeout
+Retry
+Timeout
+
+With Circuit Breaker:
+
+Fail Fast
+
+Saga Orchestrator (or Camunda) can then:
+
+Refund Payment
+Cancel Order
+
+immediately instead of waiting for long timeouts.
+-------------------------------------------------------------------------------------------------
+
+13.What is junit and Mockito?
+Junit is testing framework and validate each piece of code working as expected or not.
+Mockito is a mocking framework used to create fake object instead of calling exact API and DB calls.
+----------------------------------------------------------------------------------------------------
+
+14. How to test to call exact DB ?
+ It is integration testing.
+--------------------------------------------------------------------------------------------------------------------------
+
+15. What is integration testing?
+Integration Testing verifies that multiple components of an application work correctly together. In Spring Boot, it is commonly used to test interactions between services, repositories, databases, messaging systems, and external APIs. Unlike unit tests, integration tests use real components and often run with @SpringBootTest.
+
+Unit Test
+= Is this method working?
+
+Integration Test
+= Are these components working together?
+
+E2E Test
+= Is the entire business flow working?
+--------------------------------------------------------------------------------------------------------------------------
+
+16. We have list of cites and list of employee object now requirement is to find which employee have cities in list. Need to increase 10% salary. Write a logic?
     
 List<String> cities = Arrays.asList("Bangalore");
 
@@ -212,9 +674,15 @@ public class StreamRelated {
 	}
 
 }
+-----------------------------------------------------------------------------------------------------
 
+17. We have a requirement like need to update a employee record like salary. For that wjich which HTTP method can choose and why.
+We can use Patch. Because it is partial update.
+--------------------------------------------------------------------------------------------
+18. Difference b/w put and push
+As per REST specification.
+Patch is used for partial update.
+Put is used for whole object update.
+------------------------------------------------------------------------------------------------
 
-
-16. Difference b/w put and push
-17. 
 
