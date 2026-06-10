@@ -1,14 +1,220 @@
 1. We have HashMap, store employee object if it is slow performance how to handle this?
-2. How to find collisions in HashMap?
-3. How HashMap works internally
+   Answer: In some times it's slow because of bad hashcode implementation. Need to override properly.
+           1. Poor hashCode() implementation: If hashCode method returns same value every time. collision happened and store all values in same bucket.
+           2. Initial Capacity and Rehashing: If we already knows more records to store provide some initial capacity like below. By default capacity is 16.       When it reached 75%. it resize to nearest power of 2. 
+                Map<Employee,String> map=new HashMap<>(10000);
+           3. Thread Safety Issues: In multithreaded applications, HashMap is not safe. we can use ConcurrentHashMap.
+           4. Strong Data structure Choices: if sorting needed use TreeMap, if insertion order needed use LinkedHashMap. 
+
+
+2. What is the use of HashCode and equals method?
+   Every java class inherits hashCode and equals methods from  object class.
+   1. equals - checks whether two references point to same object(It compares the memory address)
+   2. hashCode - generates identity based integer value for that object.(It generated for memory location)
+
+EX:  Without overriding equals and hashcode method.
+
+     Employee:
+------------------
+     package com.learn.mapexample;
+
+     public class Employee {
+	
+	int id;
+	
+	String name;
+
+	public Employee(int id, String name) {
+		super();
+		this.id = id;
+		this.name = name;
+	}
+    }
+
+
+HashMapExample:
+---------------
+package com.learn.mapexample;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class HashMapExample {
+	
+	public static void main(String[] args) {
+		Employee e1=new Employee(100, "SAI");
+		Employee e2=new Employee(100, "SAI");
+		
+		Map<Employee, String> map=new HashMap<>(10000);
+		map.put(e1, "Creator");
+		map.put(e2, "Creator");
+		
+		System.out.println(map.size());
+		
+	}
+
+}
+
+O/P -- 2
+
+If we override hashcode and equals methods:
+
+package com.learn.mapexample;
+
+import java.util.Objects;
+
+public class Employee {
+	
+	int id;
+	
+	String name;
+
+	public Employee(int id, String name) {
+		super();
+		this.id = id;
+		this.name = name;
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		Employee e=(Employee)o;
+		return this.id == e.id;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+	
+
+}
+
+O/P: 1
+
+3. How to find collisions in HashMap?
+   Two different keys generate the same hash bucket.
+   Bucket calculation using hash&(n-1). It uses Bitwise and operator.
+   
+4. How HashMap works internally?
+
+1.Internal HashMap put()
+2.Generate hash using hashCode()
+
+  Calculate bucket index using:
+   hash & (n - 1)
+3.Go to bucket
+4.If empty → store directly
+5.If collision:
+  *compare keys using equals()
+  *same key → replace value
+  *different key → add new entry
+  *normal case → almost O(1)
+  *heavy collision → O(n) before Java 8-using linkedList
+  *O(log n) after treeification - Red Black Tree
+6.If threshold exceeds → resize HashMap
+
 4. Which Map follow insertion order, Which one not follow and which one used for ascending order.
+   LinkedHashMap follows insertion order.
+   HashMap not follows the insertion order.
+   TreeMap follows the Ascending order. 
+
 5. What is functional interface?
+
+   Which functional interface contains only one abstract method and any number of default and static methods. 
+   Lambda expression without functional interface not possible.
+
+ 
 6. What is the existing functional interfaces ? Which Functional interface using map.
+                //Function map(Funtion) apply method
+		numList.stream().map(a->a*a).collect(Collectors.toList());
+		//Predicate filter(Predicate) test method
+		numList.stream().filter(a->a%2==0).collect(Collectors.toList());
+		//Consumer accept method
+		numList.stream().forEach(System.out::println);
+		//Supplier generate(Supplier) get method
+		Stream.generate(()->"SAI").limit(3).forEach(System.out::println);
+		//display value incrementally 
+		AtomicInteger count=new AtomicInteger(1);
+		Stream.generate(count::getAndIncrement).limit(3).forEach(System.out::println);
+		//BinaryOperator apply method
+		numList.stream().reduce((a,b)->a+b);
+		//Comparator  compare method
+		List ss=numList.stream().sorted((a,b)->a-b).toList();
+		//UnaryOperator apply method
+		numList.replaceAll(x->x*2);
+		System.out.println(numList);
+               Stream.iterate("n", val->val+"n").limit(6).forEach(System.out::println);
+               List<Integer> listnum=  Stream.iterate(1, a->a+1).limit(5).toList();
+		System.out.println(listnum);
+
 7. What is the use of Kafka and partitions. What is the consumer group?
+   Kafka is an event-streaming platform used for asynchronous communication between services.
+   Topics are used to store messages/events. Topics are divided into partitions for scalability, parallel processing, and better performance.
+   Partitions are mainly useful when multiple instances of the same service exist within the same consumer group, because Kafka can distribute partitions  among those instances for parallel processing and scalability. 
+   Consumer groups help distribute messages among multiple consumer instances and Kafka tracks offsets using consumer groups. 
+   Offsets are unique message positions inside partitions used to track consumed messages. 
+   Replicas are copies of partitions used for fault tolerance and high availability
+
 8. How we can confirm our message is consumed or not? 
+Kafka confirms message consumption using committed offsets. By comparing the latest offset and consumer committed offset, we can identify pending messages using consumer lag.
+
 9. What is the use of acknowledgement in kafka?
+ Message processed successfully, now commit the offset.
+Two types of offset commit:
+1. Auto commit:
+   Auto commit have some issue, if consumer methods get some exception. It's already commit offset. It treated as message delivered.
+   By default auto commit is true. need to make it false.
+   enable-auto-commit=false
+
+2. Manual commit:
+   Manual commit helps to send manual acknowledgement once business logic completed.
+ 
+Ex: ack.acknowledged();
+
 10.What is the use of SAGA DP?
 11.How circuit breaker works?
 12.What is junit and Mockito?
 13. How to test to call exact DB ?
 14. What is integration testing?
+15. We have list of cites and list of employee object now requirement is to find which employee have cities in list. Need to increase 10% salary. Write a logic?
+    
+List<String> cities = Arrays.asList("Bangalore");
+
+List<Employee> employees = employeeRepo.getAllEmployeesByDepartment("IT");
+
+If we are using stream and update the employee object . Is it giving any error?
+
+package com.learn.mapexample;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class StreamRelated {
+	
+	public static void main(String[] args) {
+		List<String> names = Arrays.asList("SAI");
+		
+		Employee e1=new Employee(1, "SAI");
+		Employee e2=new Employee(2, "SAIMohan");
+
+		List<Employee> employees = new ArrayList<>();
+		employees.add(e1);
+		employees.add(e2);
+		
+		List<Employee> fil=employees.stream().filter(e->names.contains(e.getName())).collect(Collectors.toList());
+		System.out.println(fil);
+		fil.stream().forEach(a->a.setName(a.getName()+"S"));
+		System.out.println(fil);
+
+	}
+
+}
+
+
+
+16. Difference b/w put and push
+17. 
+

@@ -18,6 +18,9 @@ const data = [
 {"id":"4", name:" product4"}]
 
 8. If you are using filter what will be the result.
+9. How object update internally with redux?
+10. What is Virtual DOM?
+
 
 
 
