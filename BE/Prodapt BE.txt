@@ -1,6 +1,7 @@
 1. We have HashMap, store employee object if it is slow performance how to handle this?
    Answer: In some times it's slow because of bad hashcode implementation. Need to override properly.
-           1. Poor hashCode() implementation: If hashCode method returns same value every time. collision happened and store all values in same bucket.
+           1. Poor hashCode() implement
+tation: If hashCode method returns same value every time. collision happened and store all values in same bucket.
            2. Initial Capacity and Rehashing: If we already knows more records to store provide some initial capacity like below. By default capacity is 16.       When it reached 75%. it resize to nearest power of 2. 
                 Map<Employee,String> map=new HashMap<>(10000);
            3. Thread Safety Issues: In multithreaded applications, HashMap is not safe. we can use ConcurrentHashMap.
@@ -676,7 +677,7 @@ public class StreamRelated {
 }
 -----------------------------------------------------------------------------------------------------
 
-17. We have a requirement like need to update a employee record like salary. For that wjich which HTTP method can choose and why.
+17. We have a requirement like need to update a employee record like salary. For that which which HTTP method can choose and why.
 We can use Patch. Because it is partial update.
 --------------------------------------------------------------------------------------------
 18. Difference b/w put and push
@@ -684,5 +685,6 @@ As per REST specification.
 Patch is used for partial update.
 Put is used for whole object update.
 ------------------------------------------------------------------------------------------------
+19. What is the difference b/w using concurrentHashmap ans using synchnoized key using Multhreaded environment?
 
 

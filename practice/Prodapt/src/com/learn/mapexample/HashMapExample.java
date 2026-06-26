@@ -55,7 +55,6 @@ public class HashMapExample {
 		List<Integer> listnum=  Stream.iterate(1, a->a+1).limit(5).toList();
 		System.out.println(listnum);
 		
-		listnum.stream().forEach(k->k+1);
 		
 	}
 
