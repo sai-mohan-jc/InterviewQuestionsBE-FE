@@ -1,14 +1,19 @@
 package com.banking.customer.dto;
 
+import com.banking.customer.validator.ValidCif;
+import com.banking.customer.validator.ValidCustomerStatus;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
+@ValidCustomerStatus
 public class CustomerRequest {
 
     @NotBlank(message = "CIF is required")
+    @ValidCif
     private String cif;
 
     @NotBlank(message = "Name is required")
