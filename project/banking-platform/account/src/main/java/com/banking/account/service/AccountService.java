@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.banking.account.dto.AccountRequest;
 import com.banking.account.dto.AccountResponse;
+import com.banking.account.dto.AccountSummaryResponse;
 
 public interface AccountService {
 
@@ -12,4 +13,6 @@ public interface AccountService {
     AccountResponse getAccount(String accountNumber);
     
     List<AccountResponse> getAllAccounts();
+    
+    List<AccountSummaryResponse> getAccountSummaries();
 }

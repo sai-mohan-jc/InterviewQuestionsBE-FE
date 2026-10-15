@@ -1,5 +1,6 @@
 package com.banking.account.repository;
 
+import com.banking.account.dto.AccountSummaryResponse;
 import com.banking.account.entity.Account;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -26,4 +27,22 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             LEFT JOIN FETCH a.transactions
             """)
      List<Account> findAllWithTransactions();
+    
+    @Query("""
+    	       SELECT new com.banking.account.dto.AccountSummaryResponse(
+    	           a.accountNumber,
+    	           a.cif,
+    	           a.balance,
+    	           COUNT(t.id)
+    	       )
+    	       FROM Account a
+    	       LEFT JOIN a.transactions t
+    	       GROUP BY
+    	           a.id,
+    	           a.accountNumber,
+    	           a.cif,
+    	           a.balance
+    	       """)
+    	List<AccountSummaryResponse> findAccountSummaries();
+    
 }

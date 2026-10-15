@@ -16,4 +16,5 @@ public class AccountResponse {
     private BigDecimal balance;
     private String status;
     private List<TransactionResponse> transactions;
+    private long responseTimeMs;
 }

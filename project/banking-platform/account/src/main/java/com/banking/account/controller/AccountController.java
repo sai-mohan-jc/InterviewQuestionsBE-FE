@@ -2,6 +2,7 @@ package com.banking.account.controller;
 
 import com.banking.account.dto.AccountRequest;
 import com.banking.account.dto.AccountResponse;
+import com.banking.account.dto.AccountSummaryResponse;
 import com.banking.account.service.AccountService;
 
 import jakarta.validation.Valid;
@@ -25,8 +26,12 @@ public class AccountController {
     @ResponseStatus(HttpStatus.CREATED)
     public AccountResponse createAccount(
             @RequestBody @Valid AccountRequest request) {
-
-        return accountService.createAccount(request);
+    	long start = System.currentTimeMillis();
+    	AccountResponse response = accountService.createAccount(request);
+    	response.setResponseTimeMs(
+    	        System.currentTimeMillis() - start
+    	);
+        return response;
     }
 
     @GetMapping("/{accountNumber}")
@@ -39,5 +44,10 @@ public class AccountController {
     @GetMapping
     public List<AccountResponse> getAllAccounts() {
         return accountService.getAllAccounts();
+    }
+    
+    @GetMapping("/summary")
+    public List<AccountSummaryResponse> getAccountSummaries() {
+        return accountService.getAccountSummaries();
     }
 }
