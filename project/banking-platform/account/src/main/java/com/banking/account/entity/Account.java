@@ -1,3 +1,4 @@
+
 package com.banking.account.entity;
 
 import java.math.BigDecimal;
@@ -40,9 +41,26 @@ public class Account {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
 
+    @Builder.Default
+    @Column(
+        nullable = false,
+        precision = 19,
+        scale = 2,
+        columnDefinition = "DECIMAL(19,2) NOT NULL DEFAULT 0.00"
+    )
+    private BigDecimal reservedBalance = BigDecimal.ZERO;
+
     @Column(nullable = false)
     private String status;
-    
-    @OneToMany(mappedBy = "account",fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<AccountTransaction> transactions;
+
+    public BigDecimal getAvailableBalance() {
+        BigDecimal reserved = reservedBalance == null
+                ? BigDecimal.ZERO
+                : reservedBalance;
+
+        return balance.subtract(reserved);
+    }
 }

@@ -8,8 +8,9 @@ import org.springframework.stereotype.Repository;
 import com.banking.transaction.entity.BankTransaction;
 
 @Repository
-public interface BankTransactionRepository
-        extends JpaRepository<BankTransaction, Long> {
+public interface BankTransactionRepository extends JpaRepository<BankTransaction, Long> {
 
-    Optional<BankTransaction> findByTransactionId(String transactionId);
+	Optional<BankTransaction> findByTransactionId(String transactionId);
+
+	Optional<BankTransaction> findByIdempotencyKey(String idempotencyKey);
 }

@@ -40,5 +40,20 @@ public class GlobalExceptionHandling {
 	            .status(HttpStatus.SERVICE_UNAVAILABLE)
 	            .body(response);
 	}
+	
+	@ExceptionHandler(AccountNotFoundException.class)
+	public ResponseEntity<Map<String, Object>> handleAccountNotAvailable(
+	        AccountNotFoundException ex) {
+
+	    Map<String, Object> response = new LinkedHashMap<>();
+
+	    response.put("status", 503);
+	    response.put("error", "Account Not Available");
+	    response.put("message", ex.getMessage());
+
+	    return ResponseEntity
+	            .status(HttpStatus.NOT_FOUND)
+	            .body(response);
+	}
 
 }

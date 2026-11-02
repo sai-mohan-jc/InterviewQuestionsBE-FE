@@ -21,25 +21,28 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BankTransaction {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String transactionId;
+	@Column(nullable = false, unique = true)
+	private String transactionId;
 
-    @Column(nullable = false)
-    private String fromAccount;
+	@Column(nullable = false)
+	private String fromAccount;
 
-    @Column(nullable = false)
-    private String toAccount;
+	@Column(nullable = false)
+	private String toAccount;
 
-    @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal amount;
+	@Column(nullable = false, precision = 19, scale = 2)
+	private BigDecimal amount;
 
-    @Column(nullable = false)
-    private String transactionType;
+	@Column(nullable = false)
+	private String transactionType;
 
-    @Column(nullable = false)
-    private String status;
+	@Column(nullable = false)
+	private String status;
+
+	@Column(unique = true, length = 100)
+	private String idempotencyKey;
 }

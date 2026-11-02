@@ -1,48 +1,60 @@
 package com.banking.account.repository;
 
-import com.banking.account.dto.AccountSummaryResponse;
-import com.banking.account.entity.Account;
-
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.banking.account.dto.AccountSummaryResponse;
+import com.banking.account.entity.Account;
+
+import jakarta.persistence.LockModeType;
+
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
-    Optional<Account> findByAccountNumber(String accountNumber);
+	Optional<Account> findByAccountNumber(String accountNumber);
 
-    List<Account> findByCif(String cif);
+	List<Account> findByCif(String cif);
 
-    boolean existsByAccountNumber(String accountNumber);
-    
-    @EntityGraph(attributePaths = "transactions")
-    List<Account> findAll();
-    
-    @Query("""
-            SELECT DISTINCT a
-            FROM Account a
-            LEFT JOIN FETCH a.transactions
-            """)
-     List<Account> findAllWithTransactions();
-    
-    @Query("""
-    	       SELECT new com.banking.account.dto.AccountSummaryResponse(
-    	           a.accountNumber,
-    	           a.cif,
-    	           a.balance,
-    	           COUNT(t.id)
-    	       )
-    	       FROM Account a
-    	       LEFT JOIN a.transactions t
-    	       GROUP BY
-    	           a.id,
-    	           a.accountNumber,
-    	           a.cif,
-    	           a.balance
-    	       """)
-    	List<AccountSummaryResponse> findAccountSummaries();
-    
+	boolean existsByAccountNumber(String accountNumber);
+
+	@EntityGraph(attributePaths = "transactions")
+	List<Account> findAll();
+
+	@Query("""
+			SELECT DISTINCT a
+			FROM Account a
+			LEFT JOIN FETCH a.transactions
+			""")
+	List<Account> findAllWithTransactions();
+
+	@Query("""
+			SELECT new com.banking.account.dto.AccountSummaryResponse(
+			    a.accountNumber,
+			    a.cif,
+			    a.balance,
+			    COUNT(t.id)
+			)
+			FROM Account a
+			LEFT JOIN a.transactions t
+			GROUP BY
+			    a.id,
+			    a.accountNumber,
+			    a.cif,
+			    a.balance
+			""")
+	List<AccountSummaryResponse> findAccountSummaries();
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("""
+			SELECT a
+			FROM Account a
+			WHERE a.accountNumber = :accountNumber
+			""")
+	Optional<Account> findByAccountNumberForUpdate(@Param("accountNumber") String accountNumber);
+
 }

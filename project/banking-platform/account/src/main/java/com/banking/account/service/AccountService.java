@@ -5,6 +5,7 @@ import java.util.List;
 import com.banking.account.dto.AccountRequest;
 import com.banking.account.dto.AccountResponse;
 import com.banking.account.dto.AccountSummaryResponse;
+import com.banking.account.dto.BalanceUpdateRequest;
 
 public interface AccountService {
 
@@ -15,4 +16,7 @@ public interface AccountService {
     List<AccountResponse> getAllAccounts();
     
     List<AccountSummaryResponse> getAccountSummaries();
+    
+	// Add inside AccountService
+	AccountResponse updateBalance(String accountNumber, BalanceUpdateRequest request);
 }

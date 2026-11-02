@@ -3,6 +3,7 @@ package com.banking.account.controller;
 import com.banking.account.dto.AccountRequest;
 import com.banking.account.dto.AccountResponse;
 import com.banking.account.dto.AccountSummaryResponse;
+import com.banking.account.dto.BalanceUpdateRequest;
 import com.banking.account.service.AccountService;
 
 import jakarta.validation.Valid;
@@ -16,38 +17,41 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/accounts")
 public class AccountController {
 
-    private final AccountService accountService;
+	private final AccountService accountService;
 
-    public AccountController(AccountService accountService) {
-        this.accountService = accountService;
-    }
+	public AccountController(AccountService accountService) {
+		this.accountService = accountService;
+	}
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public AccountResponse createAccount(
-            @RequestBody @Valid AccountRequest request) {
-    	long start = System.currentTimeMillis();
-    	AccountResponse response = accountService.createAccount(request);
-    	response.setResponseTimeMs(
-    	        System.currentTimeMillis() - start
-    	);
-        return response;
-    }
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public AccountResponse createAccount(@RequestBody @Valid AccountRequest request) {
+		long start = System.currentTimeMillis();
+		AccountResponse response = accountService.createAccount(request);
+		response.setResponseTimeMs(System.currentTimeMillis() - start);
+		return response;
+	}
 
-    @GetMapping("/{accountNumber}")
-    public AccountResponse getAccount(
-            @PathVariable String accountNumber) {
+	@GetMapping("/{accountNumber}")
+	public AccountResponse getAccount(@PathVariable String accountNumber) {
 
-        return accountService.getAccount(accountNumber);
-    }
-    
-    @GetMapping
-    public List<AccountResponse> getAllAccounts() {
-        return accountService.getAllAccounts();
-    }
-    
-    @GetMapping("/summary")
-    public List<AccountSummaryResponse> getAccountSummaries() {
-        return accountService.getAccountSummaries();
-    }
+		return accountService.getAccount(accountNumber);
+	}
+
+	@GetMapping
+	public List<AccountResponse> getAllAccounts() {
+		return accountService.getAllAccounts();
+	}
+
+	@GetMapping("/summary")
+	public List<AccountSummaryResponse> getAccountSummaries() {
+		return accountService.getAccountSummaries();
+	}
+
+	@PutMapping("/{accountNumber}/balance")
+	public AccountResponse updateBalance(@PathVariable String accountNumber,
+			@RequestBody @Valid BalanceUpdateRequest request) {
+
+		return accountService.updateBalance(accountNumber, request);
+	}
 }
