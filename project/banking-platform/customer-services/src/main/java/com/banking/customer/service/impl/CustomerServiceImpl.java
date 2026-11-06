@@ -9,6 +9,11 @@ import com.banking.customer.repository.CustomerRepository;
 import com.banking.customer.service.CustomerService;
 import org.springframework.stereotype.Service;
 
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
@@ -54,16 +59,36 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerResponse getCustomerByCif(String cif) {
-    	
 
+        // Get the authenticated user from Spring Security context
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof JwtAuthenticationToken jwtAuthentication)) {
+            throw new AccessDeniedException("Access denied");
+        }
+
+        // Check whether the authenticated user is an ADMIN
+        boolean isAdmin = jwtAuthentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        "ROLE_ADMIN".equals(authority.getAuthority()));
+
+        // CUSTOMER can access only their own CIF
+        if (!isAdmin) {
+            String authenticatedCif =
+                    jwtAuthentication.getToken().getClaimAsString("customerCif");
+
+            if (authenticatedCif == null || !authenticatedCif.equals(cif)) {
+                throw new AccessDeniedException(
+                        "You are not authorized to access this customer");
+            }
+        }
+
+        // Fetch customer only after ownership validation
         Customer customer = customerRepository.findByCif(cif)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Customer not found: " + cif));
-        
-        
-        
-        
 
         return new CustomerResponse(
                 customer.getCif(),
