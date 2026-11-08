@@ -10,8 +10,11 @@ public class AccountEarmarkClient {
 
 	private final RestClient restClient;
 
-	public AccountEarmarkClient(RestClient.Builder builder) {
-		this.restClient = builder.baseUrl("http://localhost:8082").build();
+	public AccountEarmarkClient(
+	        @org.springframework.beans.factory.annotation.Qualifier(
+	                "accountServiceRestClient")
+	        RestClient restClient) {
+	    this.restClient = restClient;
 	}
 
 	public ReserveFundsResponse reserve(String accountNumber, String holdId, BigDecimal amount) {
