@@ -24,7 +24,6 @@ public class ChatController {
     
     @GetMapping("/health")
     public String health() {
-        System.out.println("AI Assistant API is reached");
         return "AI Assistant Service is running";
     }
 }

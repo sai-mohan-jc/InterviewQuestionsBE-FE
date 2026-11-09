@@ -29,6 +29,11 @@ function Sidebar() {
           <Link to="/transactions">Transactions</Link>
         </li>
 
+         <li>
+          <Link to="/ai-assistant">AI Assistant</Link>
+        </li>
+
+
         
       </ul>
 

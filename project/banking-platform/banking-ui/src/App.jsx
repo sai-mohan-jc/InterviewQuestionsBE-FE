@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Profile from './pages/Profile';
 import Transfer from './pages/Transfer';
+import AIAssistant from './pages/AIAssistant';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
     <Route path="/accounts" element={<Accounts/>} />
     <Route path="/transfers" element={<Transfer/>} />
     <Route path="/transactions" element={<Transactions/>} />
+    <Route path="/ai-assistant" element={<AIAssistant />} />
   </Routes>
 </div>
     </div>
