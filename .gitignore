@@ -1,0 +1,19 @@
+# Certificate and security files
+/certs/
+
+# Java build files
+**/target/
+
+# IDE files
+.classpath
+.project
+.settings/
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Environment variables and secrets
+.env
+.env.*

@@ -34,7 +34,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-
+                		.requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/customers/**"

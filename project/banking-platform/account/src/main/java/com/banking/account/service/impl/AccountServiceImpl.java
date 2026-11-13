@@ -144,4 +144,13 @@ public class AccountServiceImpl implements AccountService {
 				updatedAccount.getAccountType(), updatedAccount.getBalance(), updatedAccount.getStatus(), List.of(),
 				System.currentTimeMillis());
 	}
+
+	@Override
+	public List<AccountSummaryResponse> getAccountsByCif(String cif) {
+
+		return accountRepository.findByCif(cif).stream()
+				.map(account -> new AccountSummaryResponse(account.getAccountNumber(), account.getCif(),
+						account.getBalance(), (long) account.getTransactions().size()))
+				.toList();
+	}
 }

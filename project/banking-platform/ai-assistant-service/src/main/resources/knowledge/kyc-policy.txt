@@ -1,0 +1,41 @@
+# Sample Banking KYC Policy
+
+## 1. Purpose of KYC
+
+Know Your Customer (KYC) is a process used by banks to verify the identity of their customers. Its purpose is to prevent identity fraud, money laundering, terrorist financing and other financial crimes.
+
+## 2. Customer Identity Verification
+
+The bank must collect and verify valid customer identity information before providing services that require KYC verification.
+
+Examples of identity information include:
+- Full legal name
+- Date of birth
+- Government-issued identity document
+- Customer identification number
+
+## 3. Address Verification
+
+The bank must collect valid address information and verify it using acceptable supporting documents according to its internal procedures.
+
+## 4. KYC Status
+
+A customer can have one of the following KYC statuses:
+
+- PENDING: Customer information has been submitted but verification is not yet completed.
+- VERIFIED: Customer identity and required information have been successfully verified.
+- REJECTED: Customer verification has failed or submitted information is insufficient.
+
+## 5. Periodic KYC Updates
+
+Customer information should be reviewed periodically according to the bank's internal risk classification and applicable regulatory requirements.
+
+Customers may be asked to submit updated identity or address documents when required.
+
+## 6. Failed KYC Verification
+
+If KYC verification fails, the bank should investigate the reason and request corrected information or supporting documents where appropriate.
+
+Certain banking services may be restricted until the required verification is successfully completed.
+
+Note: This is a fictional sample policy created for software development and RAG learning. It is not an actual bank policy or regulatory document.

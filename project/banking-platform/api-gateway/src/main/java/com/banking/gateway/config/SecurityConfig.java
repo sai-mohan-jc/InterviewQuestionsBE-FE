@@ -16,98 +16,71 @@ import com.banking.gateway.security.JwtRoleConverter;
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
-	
+
 	private final SessionValidationWebFilter sessionValidationWebFilter;
 
 	public SecurityConfig(SessionValidationWebFilter sessionValidationWebFilter) {
-	    this.sessionValidationWebFilter = sessionValidationWebFilter;
+		this.sessionValidationWebFilter = sessionValidationWebFilter;
 	}
 
-    @Bean
-    public SecurityWebFilterChain securityWebFilterChain(
-            ServerHttpSecurity http,
-            JwtRoleConverter jwtRoleConverter) {
+	@Bean
+	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, JwtRoleConverter jwtRoleConverter) {
 
-        ReactiveJwtAuthenticationConverter jwtAuthenticationConverter =
-                new ReactiveJwtAuthenticationConverter();
+		ReactiveJwtAuthenticationConverter jwtAuthenticationConverter = new ReactiveJwtAuthenticationConverter();
 
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
-                jwtRoleConverter
-        );
+		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtRoleConverter);
 
-        return http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+		return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
 
-                
-                .authorizeExchange(exchange -> exchange
+				.authorizeExchange(exchange -> exchange
 
-                	    // Public authentication APIs
-                	    .pathMatchers(
-                	        "/api/auth/register",
-                	        "/api/auth/login",
-                	        "/api/auth/refresh",
-                	        "/api/auth/logout",
-                	        "/api/ai/*"
-                	    ).permitAll()
+						// Public authentication APIs
+						.pathMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout")
+						.permitAll()
 
-                	    // Auth Service test/dashboard APIs
-                	    .pathMatchers("/api/auth/customer/**").hasRole("CUSTOMER")
-                	    .pathMatchers("/api/auth/reviewer/**").hasRole("REVIEWER")
-                	    .pathMatchers("/api/auth/admin/**").hasRole("ADMIN")
-                	    .pathMatchers("/api/auth/profile").authenticated()
+						// Auth Service test/dashboard APIs
+						.pathMatchers("/api/auth/customer/**").hasRole("CUSTOMER").pathMatchers("/api/auth/reviewer/**")
+						.hasRole("REVIEWER").pathMatchers("/api/auth/admin/**").hasRole("ADMIN")
+						.pathMatchers("/api/auth/profile").authenticated()
+						// AI health check
+						.pathMatchers("/api/ai/health").permitAll()
 
-                	    // Customer Service
-                	    .pathMatchers(HttpMethod.GET, "/api/customers/**")
-                	        .hasAnyRole("CUSTOMER", "ADMIN")
+						// Banking AI Assistant - authenticated customers only
+						.pathMatchers("/api/ai/**").hasRole("CUSTOMER")
 
-                	    .pathMatchers(HttpMethod.POST, "/api/customers/**")
-                	        .hasRole("ADMIN")
+						// Customer Service
+						.pathMatchers(HttpMethod.GET, "/api/customers/**").hasAnyRole("CUSTOMER", "ADMIN")
 
-                	    // Account Service - read access only
-                	    .pathMatchers(HttpMethod.GET, "/api/accounts/**")
-                	        .hasAnyRole("CUSTOMER", "ADMIN")
+						.pathMatchers(HttpMethod.POST, "/api/customers/**").hasRole("ADMIN")
 
-                	    .pathMatchers("/api/accounts/**").denyAll()
+						// Account Service - read access only
+						.pathMatchers(HttpMethod.GET, "/api/accounts/**").hasAnyRole("CUSTOMER", "ADMIN")
 
-                	    // Payment Orchestration
-                	    .pathMatchers(HttpMethod.POST, "/api/payments/**")
-                	        .hasRole("CUSTOMER")
+						.pathMatchers("/api/accounts/**").denyAll()
 
-                	    .pathMatchers(HttpMethod.GET, "/api/payments/**")
-                	        .hasAnyRole("CUSTOMER", "ADMIN")
+						// Payment Orchestration
+						.pathMatchers(HttpMethod.POST, "/api/payments/**").hasRole("CUSTOMER")
 
-                	    .pathMatchers("/api/payments/**").denyAll()
+						.pathMatchers(HttpMethod.GET, "/api/payments/**").hasAnyRole("CUSTOMER", "ADMIN")
 
-                	    // Centralised Earmarking / Review
-                	    .pathMatchers("/api/review-cases/**")
-                	        .hasAnyRole("REVIEWER", "ADMIN")
+						.pathMatchers("/api/payments/**").denyAll()
 
-                	    // Internal services must not be exposed through Gateway
-                	    .pathMatchers(
-                	        "/api/transactions/**",
-                	        "/api/screening/**",
-                	        "/api/internal/**"
-                	    ).denyAll()
+						// Centralised Earmarking / Review
+						.pathMatchers("/api/review-cases/**").hasAnyRole("REVIEWER", "ADMIN")
 
-                	    // Health check
-                	    .pathMatchers("/actuator/health").permitAll()
+						// Internal services must not be exposed through Gateway
+						.pathMatchers("/api/transactions/**", "/api/screening/**", "/api/internal/**").denyAll()
 
-                	    // Deny unmatched endpoints
-                	    .anyExchange().denyAll()
-                	)
+						// Health check
+						.pathMatchers("/actuator/**").permitAll()
 
+						// Deny unmatched endpoints
+						.anyExchange().denyAll())
 
-                .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(
-                                        jwtAuthenticationConverter
-                                )
-                        )
-                ).addFilterAfter(
-                        sessionValidationWebFilter,
-                        SecurityWebFiltersOrder.AUTHENTICATION
-                )
+				.oauth2ResourceServer(
+						oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
+				.addFilterAfter(sessionValidationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
-                .build();
-    }
+				.build();
+	}
 }

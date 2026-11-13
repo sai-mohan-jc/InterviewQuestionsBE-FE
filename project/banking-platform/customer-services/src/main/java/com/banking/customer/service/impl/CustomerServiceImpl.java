@@ -53,7 +53,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
     
     public String getDefaultvalue() {
-    	System.out.println("Call default method");
+    	
     	return "Default";
     }
 

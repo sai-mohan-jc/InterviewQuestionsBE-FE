@@ -19,4 +19,6 @@ public interface AccountService {
     
 	// Add inside AccountService
 	AccountResponse updateBalance(String accountNumber, BalanceUpdateRequest request);
+	
+	List<AccountSummaryResponse> getAccountsByCif(String cif);
 }
